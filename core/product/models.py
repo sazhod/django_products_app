@@ -1,11 +1,15 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from datetime import date
 
 
+User = get_user_model()
+
+
 class Product(models.Model):
-    user = models.ForeignKey('user.CustomUser', on_delete=models.CASCADE, limit_choices_to={'role': settings.TEACHER})
+    user = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role': settings.TEACHER})
     title = models.CharField(max_length=255, verbose_name='Название')
     start_date = models.DateField(verbose_name='Дата старта', null=True)
     start_time = models.TimeField(verbose_name='Время старта')
@@ -42,7 +46,7 @@ class Group(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     min_number_of_user = models.PositiveSmallIntegerField(verbose_name='Минимальное количество учеников')
     max_number_of_user = models.PositiveSmallIntegerField(verbose_name='Максимальное количество учеников')
-    students = models.ManyToManyField('user.CustomUser', limit_choices_to={'role': settings.STUDENT})
+    students = models.ManyToManyField(User, limit_choices_to={'role': settings.STUDENT})
 
     class Meta:
         verbose_name = 'Группа'
