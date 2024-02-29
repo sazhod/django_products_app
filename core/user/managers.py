@@ -1,4 +1,5 @@
 from django.contrib.auth.base_user import BaseUserManager
+from django.db import models
 from django.conf import settings
 
 
@@ -43,3 +44,18 @@ class CustomUserManager(BaseUserManager):
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser должен иметь is_superuser=True.")
         return self._create_user(email, password, **extra_fields)
+
+
+class TeacherManager(CustomUserManager):
+    def get_queryset(self):
+        return super().get_queryset().filter(role=settings.TEACHER)
+
+
+class StudentManager(CustomUserManager):
+    def get_queryset(self):
+        return super().get_queryset().filter(role=settings.STUDENT)
+
+
+class UndefinedUserManager(CustomUserManager):
+    def get_queryset(self):
+        return super().get_queryset().filter(role=settings.UNDEFINED)

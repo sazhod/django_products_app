@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User, AbstractUser
 from django.db import models
-from .managers import CustomUserManager
+from .managers import CustomUserManager, TeacherManager, StudentManager, UndefinedUserManager
 from django.conf import settings
 
 
@@ -17,6 +17,9 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = []
 
     objects = CustomUserManager()
+    teachers = TeacherManager()
+    students = StudentManager()
+    undefined_users = UndefinedUserManager()
 
     def __str__(self):
         return self.email
