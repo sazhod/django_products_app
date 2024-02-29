@@ -1,5 +1,10 @@
 from django.contrib import admin
-from .models import Product, Lesson, Group
+from .models import Product, Lesson, Group, StudentInGroup
+
+
+class StudentInGroupInline(admin.TabularInline):
+    model = StudentInGroup
+    extra = 1
 
 
 @admin.register(Product)
@@ -14,4 +19,4 @@ class LessonAdmin(admin.ModelAdmin):
 
 @admin.register(Group)
 class GroupAdmin(admin.ModelAdmin):
-    pass
+    inlines = [StudentInGroupInline]

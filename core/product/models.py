@@ -11,7 +11,7 @@ User = get_user_model()
 class Product(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role': settings.TEACHER})
     title = models.CharField(max_length=255, verbose_name='Название')
-    start_date = models.DateField(verbose_name='Дата старта', null=True)
+    start_date = models.DateField(verbose_name='Дата старта')
     start_time = models.TimeField(verbose_name='Время старта')
     cost = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Стоимость')
 
@@ -19,7 +19,7 @@ class Product(models.Model):
         verbose_name = 'Продукт'
         verbose_name_plural = 'Продукты'
 
-    def clean(self, *args, **kwargs):
+    def clean(self):
         super().clean()
         if self.start_date <= date.today():
             raise ValidationError('Дата начала должна быть позже текущей даты!')
@@ -43,19 +43,35 @@ class Lesson(models.Model):
 
 class Group(models.Model):
     title = models.CharField(max_length=255, verbose_name='Название')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     min_number_of_user = models.PositiveSmallIntegerField(verbose_name='Минимальное количество учеников')
     max_number_of_user = models.PositiveSmallIntegerField(verbose_name='Максимальное количество учеников')
-    students = models.ManyToManyField(User, limit_choices_to={'role': settings.STUDENT})
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Группа'
         verbose_name_plural = 'Группы'
 
-    def clean(self, *args, **kwargs):
-        super().clean(*args, **kwargs)
+    def clean(self):
+        super().clean()
         if self.max_number_of_user <= self.min_number_of_user:
             raise ValidationError('Максимальное количество учеников должно быть больше минимального!')
 
     def __str__(self):
         return self.title
+
+
+class StudentInGroup(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    student = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role': settings.STUDENT})
+
+    class Meta:
+        verbose_name = 'Студент в группе'
+        verbose_name_plural = 'Студенты в группах'
+        constraints = [
+            models.UniqueConstraint(
+                fields=("group", "student"), name="unique_student_in_group"
+            ),
+        ]
+
+    def __str__(self):
+        return f'{self.group}_{self.student.email}'
