@@ -1,5 +1,5 @@
 from django.contrib.auth.base_user import BaseUserManager
-from .constants import SUPERUSER
+from django.conf import settings
 
 
 class CustomUserManager(BaseUserManager):
@@ -32,7 +32,7 @@ class CustomUserManager(BaseUserManager):
         """
         Установка флагов для superuser.
         """
-        extra_fields.setdefault('role', SUPERUSER)
+        extra_fields.setdefault('role', settings.SUPERUSER)
 
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)

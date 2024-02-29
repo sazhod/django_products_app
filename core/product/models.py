@@ -1,5 +1,7 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.conf import settings
+from datetime import date
 
 
 class Product(models.Model):
@@ -12,6 +14,11 @@ class Product(models.Model):
     class Meta:
         verbose_name = 'Продукт'
         verbose_name_plural = 'Продукты'
+
+    def clean(self, *args, **kwargs):
+        super().clean()
+        if self.start_date <= date.today():
+            raise ValidationError('Дата начала должна быть позже текущей даты!')
 
     def __str__(self):
         return self.title
@@ -40,6 +47,11 @@ class Group(models.Model):
     class Meta:
         verbose_name = 'Группа'
         verbose_name_plural = 'Группы'
+
+    def clean(self, *args, **kwargs):
+        super().clean(*args, **kwargs)
+        if self.max_number_of_user <= self.min_number_of_user:
+            raise ValidationError('Максимальное количество учеников должно быть больше минимального!')
 
     def __str__(self):
         return self.title

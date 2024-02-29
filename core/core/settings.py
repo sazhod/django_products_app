@@ -130,13 +130,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Custom User model
 AUTH_USER_MODEL = "user.CustomUser"
 
-# Role from Custom User Model
+# Role fore Custom User Model
 SUPERUSER = 1
 TEACHER = 2
 STUDENT = 3
+UNDEFINED = 4
 
 USER_ROLE_CHOICES = (
       (SUPERUSER, 'Superuser'),
       (TEACHER, 'Преподаватель'),
       (STUDENT, 'Ученик'),
+      (UNDEFINED, 'Не определен'),
 )

@@ -10,7 +10,8 @@ class CustomUser(AbstractUser):
     """
     username = None
     email = models.EmailField("email адрес", unique=True)
-    role = models.PositiveSmallIntegerField(verbose_name='Роль', choices=settings.USER_ROLE_CHOICES)
+    role = models.PositiveSmallIntegerField(verbose_name='Роль',
+                                            choices=settings.USER_ROLE_CHOICES, default=settings.UNDEFINED)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
