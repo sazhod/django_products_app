@@ -2,18 +2,27 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.conf import settings
-from datetime import date
+from django.utils import timezone
 
 
 User = get_user_model()
 
 
+class ActualProductManager(models.Manager):
+    def get_queryset(self):
+        print(timezone.localdate())
+        return super().get_queryset().filter(start_date__gte=timezone.localdate())
+
+
 class Product(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role': settings.TEACHER})
     title = models.CharField(max_length=255, verbose_name='Название')
-    start_date = models.DateField(verbose_name='Дата старта')
+    start_date = models.DateField(verbose_name='Дата старта', null=True)
     start_time = models.TimeField(verbose_name='Время старта')
     cost = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Стоимость')
+
+    objects = models.Manager()
+    actual = ActualProductManager()
 
     class Meta:
         verbose_name = 'Продукт'
@@ -21,7 +30,7 @@ class Product(models.Model):
 
     def clean(self):
         super().clean()
-        if self.start_date <= date.today():
+        if self.start_date <= timezone.localdate():
             raise ValidationError('Дата начала должна быть позже текущей даты!')
 
     def __str__(self):
@@ -29,7 +38,7 @@ class Product(models.Model):
 
 
 class Lesson(models.Model):
-    product = models.OneToOneField(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='lessons')
     title = models.CharField(max_length=255, verbose_name='Название')
     link = models.URLField(verbose_name='Ссылка на видео')
 

@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Product, Group, StudentInGroup
-from .serializers import ProductSerializer
+from .serializers import ProductSerializer, ActualProductSerializer
 from .utils import user_allocation_algorithm
 
 
@@ -23,3 +23,14 @@ class ProductViewSet(viewsets.ModelViewSet):
             return Response({'status': 'Вы уже зарегистрированы в данном продукте.'}, status=status.HTTP_409_CONFLICT)
 
         return Response({'status': 'Подходящая группа не найдена.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def actual(self, request):
+        serializer = ActualProductSerializer(Product.actual.all(), many=True)
+
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def get_lessons(self, request, pk=None):
+        # допилить метод вывода инфы по урокам
+        pass
