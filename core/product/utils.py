@@ -12,9 +12,9 @@ def user_allocation_algorithm(request, pk) -> Group:
     :param pk:
     :return:
     """
-
     group = Group.objects.annotate(c=Count('studentingroup')).exclude(c=F('max_number_of_user')).filter(
         product=pk).order_by('c').first()
+
     if group:
         student_in_group = StudentInGroup(group=group, student=request.user)
         student_in_group.save()

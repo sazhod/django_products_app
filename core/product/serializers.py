@@ -17,6 +17,11 @@ class ActualProductSerializer(serializers.ModelSerializer):
         exclude = ['user']
 
     def get_lesson_count(self, obj):
+        # ТУТ ЗАПРОС ВЫПОЛНЯЕТСЯ КАЖДЫЙ РАЗ ДЛЯ КАЖДОГО ОБЪЕКТА(ИСПРАВИТЬ!)
         return Lesson.objects.filter(product=obj).count()
 
 
+class LessonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Lesson
+        exclude = ['id', 'product']

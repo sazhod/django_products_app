@@ -10,7 +10,6 @@ User = get_user_model()
 
 class ActualProductManager(models.Manager):
     def get_queryset(self):
-        print(timezone.localdate())
         return super().get_queryset().filter(start_date__gte=timezone.localdate())
 
 
