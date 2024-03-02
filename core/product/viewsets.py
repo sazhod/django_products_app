@@ -12,11 +12,20 @@ from .permissions import IsTeacherReadOnly
 
 
 class ProductViewSet(viewsets.ModelViewSet):
+    """
+    ModelViewSet Для модели Product
+    """
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def gaining_access(self, request, pk=None):
+        """
+        Endpoint products/<int>/gaining_access/
+        method POST
+        Отвечает за предоставление авторизованному пользователю доступа к продукту.
+        Вызывает метод автоматического распределения пользователей по группам.
+        """
         try:
             if pk and (group := user_allocation_algorithm(request, pk)) is not None:
                 return Response({'status': f'Вы получили доступ к продукту. Вы были добавлены в группу {group.title}'},
@@ -28,6 +37,11 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def actual(self, request):
+        """
+        Endpoint products/actual/
+        method GET
+        Отвечает за предоставление авторизованному пользователю списка не начатых продуктов.
+        """
         products = Product.actual.all()
 
         if products:
@@ -38,6 +52,12 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
     def get_lessons(self, request, pk=None):
+        """
+        Endpoint products/<int>/get_lessons
+        method GET
+        Отвечает за предоставление авторизованному пользователю с ролью студента списка уроков
+            связанных с его продуктом.
+        """
         has_access = StudentInGroup.objects.filter(
             student=request.user,
             group__pk__in=Group.objects.all().values('product').filter(product__pk=pk).values('pk')).exists()

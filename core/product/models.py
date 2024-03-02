@@ -10,6 +10,9 @@ User = get_user_model()
 
 
 class ActualProductManager(models.Manager):
+    """
+    CustomManager для получения списка не начатых продуктов.
+    """
     def get_queryset(self):
         return Lesson.objects.values('product').filter(product__start_date__gte=timezone.localdate()).annotate(
             lesson_count=Count('product')).prefetch_related('product').values(
@@ -18,6 +21,9 @@ class ActualProductManager(models.Manager):
 
 
 class Product(models.Model):
+    """
+    Модель описывающая продукт.
+    """
     user = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role': settings.TEACHER})
     title = models.CharField(max_length=255, verbose_name='Название')
     start_date = models.DateField(verbose_name='Дата старта', null=True)
@@ -32,6 +38,10 @@ class Product(models.Model):
         verbose_name_plural = 'Продукты'
 
     def clean(self):
+        """
+        Метод валидации нового продукта.
+        Если указана прошедшая или текущая дата старта, то raise ValidationError.
+        """
         super().clean()
         if self.start_date <= timezone.localdate():
             raise ValidationError('Дата начала должна быть позже текущей даты!')
@@ -41,6 +51,9 @@ class Product(models.Model):
 
 
 class Lesson(models.Model):
+    """
+    Модель описывающая урок.
+    """
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='lessons')
     title = models.CharField(max_length=255, verbose_name='Название')
     link = models.URLField(verbose_name='Ссылка на видео')
@@ -54,6 +67,9 @@ class Lesson(models.Model):
 
 
 class Group(models.Model):
+    """
+    Модель описывающая группы.
+    """
     title = models.CharField(max_length=255, verbose_name='Название')
     min_number_of_user = models.PositiveSmallIntegerField(verbose_name='Минимальное количество учеников')
     max_number_of_user = models.PositiveSmallIntegerField(verbose_name='Максимальное количество учеников')
@@ -64,6 +80,10 @@ class Group(models.Model):
         verbose_name_plural = 'Группы'
 
     def clean(self):
+        """
+        Метод валидации новой группы.
+        Если максимальное количество участников меньше либо равно минимальному, то raise ValidationError.
+        """
         super().clean()
         if self.max_number_of_user <= self.min_number_of_user:
             raise ValidationError('Максимальное количество учеников должно быть больше минимального!')
@@ -73,6 +93,10 @@ class Group(models.Model):
 
 
 class StudentInGroup(models.Model):
+    """
+    Модуль описывающая студентов в группах. ManyToMany.
+    Реализовано ограничение на уникальную пару "group", "student"
+    """
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     student = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role': settings.STUDENT})
 

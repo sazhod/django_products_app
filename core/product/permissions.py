@@ -3,7 +3,9 @@ from django.conf import settings
 
 
 class IsTeacherReadOnly(permissions.BasePermission):
-
+    """
+    CustomPermissions для доступа к статистике авторизованному пользователю с ролью учитель. ReadOnly.
+    """
     edit_methods = ("GET",)
 
     def has_permission(self, request, view):
