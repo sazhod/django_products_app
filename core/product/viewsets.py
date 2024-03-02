@@ -8,6 +8,7 @@ from .models import Product, Group, StudentInGroup, Lesson
 from .serializers import ProductSerializer, ActualProductSerializer, LessonSerializer
 from .utils import user_allocation_algorithm
 from django.utils import timezone
+from .permissions import IsTeacherReadOnly
 
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -28,12 +29,31 @@ class ProductViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def actual(self, request):
         products = Product.actual.all()
-        serializer = ActualProductSerializer(products, many=True)
-        return Response(serializer.data)
+
+        if products:
+            serializer = ActualProductSerializer(products, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response({'status': 'Продукты, доступные для покупки, отсутствуют.'}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
     def get_lessons(self, request, pk=None):
-        lessons = Lesson.objects.filter(product__pk=pk).select_related()
-        serializer = LessonSerializer(lessons, many=True)
-        return Response(serializer.data)
+        has_access = StudentInGroup.objects.filter(
+            student=request.user,
+            group__pk__in=Group.objects.all().values('product').filter(product__pk=pk).values('pk')).exists()
 
+        if not has_access:
+            return Response({'status': 'Отказано в доступе.'}, status=status.HTTP_403_FORBIDDEN)
+
+        lessons = Lesson.objects.filter(product__pk=pk).select_related()
+        if lessons:
+            serializer = LessonSerializer(lessons, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response({'status': 'Уроки не предоставлены.'}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsTeacherReadOnly])
+    def statistics(self, request):
+        products = self.get_queryset()
+
+        return Response({'status': 'Уроки не предоставлены.'}, status=status.HTTP_200_OK)
