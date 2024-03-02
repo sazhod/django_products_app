@@ -8,17 +8,12 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ActualProductSerializer(serializers.ModelSerializer):
-
-    lesson_count = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Product
-        exclude = ['user']
-
-    def get_lesson_count(self, obj):
-        # ТУТ ЗАПРОС ВЫПОЛНЯЕТСЯ КАЖДЫЙ РАЗ ДЛЯ КАЖДОГО ОБЪЕКТА(ИСПРАВИТЬ!)
-        return Lesson.objects.filter(product=obj).count()
+class ActualProductSerializer(serializers.Serializer):
+    title = serializers.CharField(source='product__title')
+    lesson_count = serializers.IntegerField()
+    start_date = serializers.DateField(source='product__start_date')
+    start_time = serializers.TimeField(source='product__start_time')
+    cost = serializers.DecimalField(max_digits=6, decimal_places=2, source='product__cost')
 
 
 class LessonSerializer(serializers.ModelSerializer):

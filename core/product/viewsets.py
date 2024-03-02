@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from .models import Product, Group, StudentInGroup, Lesson
 from .serializers import ProductSerializer, ActualProductSerializer, LessonSerializer
 from .utils import user_allocation_algorithm
+from django.utils import timezone
 
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -26,7 +27,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def actual(self, request):
-        products = Product.actual.all().prefetch_related()
+        products = Product.actual.all()
         serializer = ActualProductSerializer(products, many=True)
         return Response(serializer.data)
 

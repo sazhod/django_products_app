@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.conf import settings
+from django.db.models import Count, OuterRef
 from django.utils import timezone
 
 
@@ -10,7 +11,10 @@ User = get_user_model()
 
 class ActualProductManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(start_date__gte=timezone.localdate())
+        return Lesson.objects.values('product').filter(product__start_date__gte=timezone.localdate()).annotate(
+            lesson_count=Count('product')).prefetch_related('product').values(
+            'product__title', 'lesson_count', 'product__start_date',
+            'product__start_time', 'product__cost')
 
 
 class Product(models.Model):
